@@ -2,7 +2,7 @@ import defineAction from '../../../../helpers/define-action.js';
 
 export default defineAction({
   name: 'Select From List',
-  key: 'select_from_list',
+  key: 'selectFromList',
   description: 'Select items from a given List based on a condition',
   arguments: [
     {
