@@ -2,7 +2,7 @@ import defineAction from '../../../../helpers/define-action.js';
 
 export default defineAction({
   name: 'Rename Keys',
-  key: 'rename_keys',
+  key: 'renameKeys',
   description: 'Rename keys in a given object',
   arguments: [
     {
