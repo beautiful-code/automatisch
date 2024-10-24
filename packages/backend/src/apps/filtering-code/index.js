@@ -4,9 +4,9 @@ import actions from './actions/index.js';
 
 export default defineApp({
   name: 'Filtering Code',
-  key: 'filtering_code',
-  iconUrl: '{BASE_URL}/apps/filtering_code/assets/favicon.svg',
-  authDocUrl: '{DOCS_URL}/apps/filtering_code/connection',
+  key: 'filtering-code',
+  iconUrl: '{BASE_URL}/apps/filtering-code/assets/favicon.svg',
+  authDocUrl: '{DOCS_URL}/apps/filtering-code/connection',
   supportsConnections: false,
   baseUrl: '',
   apiBaseUrl: '',
