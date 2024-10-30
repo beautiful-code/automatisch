@@ -3,6 +3,7 @@ export async function up(knex) {
     table.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
     table.string('name');
     table.uuid('user_id').references('id').inTable('users');
+    table.boolean('auto_scheduled').defaultTo(true);
 
     table.timestamps(true, true);
   });

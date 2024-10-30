@@ -33,6 +33,7 @@ class Flow extends Base {
       deletedAt: { type: 'string' },
       createdAt: { type: 'string' },
       updatedAt: { type: 'string' },
+      autoScheduled: { type: 'boolean' },
     },
   };
 

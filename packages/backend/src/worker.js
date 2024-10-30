@@ -10,6 +10,8 @@ import './workers/trigger.js';
 import './workers/action.js';
 import './workers/email.js';
 import './workers/delete-user.ee.js';
+import './workers/llm-scheduler.ee.js';
+import './queues/llm-scheduler.ee.js';
 
 if (appConfig.isCloud) {
   import('./workers/remove-cancelled-subscriptions.ee.js');
