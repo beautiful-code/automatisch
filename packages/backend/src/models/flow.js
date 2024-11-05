@@ -374,7 +374,7 @@ class Flow extends Base {
           publishedAt: new Date().toISOString(),
         });
 
-        const jobName = `${JOB_NAME}-${this.id}`;
+        const jobName = `${JOB_NAME}-${this.name}-${this.id}`;
 
         await flowQueue.add(
           jobName,

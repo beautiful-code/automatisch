@@ -12,7 +12,7 @@ import {
   REMOVE_AFTER_7_DAYS_OR_50_JOBS,
 } from '../helpers/remove-job-configuration.js';
 
-const EVERY_1_MINUTE_CRON = '*/1 * * * *';
+const EVERY_1_MINUTE_CRON = '*/2 * * * *';
 const JOB_NAME = 'flow';
 export const worker = new Worker(
   'llm-scheduler',
@@ -22,38 +22,46 @@ export const worker = new Worker(
       .whereNull('deleted_at')
       .andWhere('auto_scheduled', false);
 
-    const repeatOptions = {
-      pattern: EVERY_1_MINUTE_CRON,
-    };
-
     for (const flow of flows) {
-      const jobName = `${JOB_NAME}-${flow.id}`;
-      logger.info(`Adding flow to the queue: Flow ID: ${flow.id}`);
+      const triggerStep = await flow.getTriggerStep();
+      const trigger = await triggerStep.getTriggerCommand();
+      const interval = trigger.getInterval?.(triggerStep.parameters);
 
-      const repeatableJobs = await flowQueue.getRepeatableJobs();
-      const job = repeatableJobs.find((job) => job.id === flow.id);
+      const repeatOptions = {
+        pattern: interval || EVERY_1_MINUTE_CRON,
+      };
 
-      if (!job) {
-        await flowQueue.add(
-          jobName,
-          { flowId: flow.id },
-          {
-            repeat: repeatOptions,
-            jobId: flow.id,
-            removeOnComplete: REMOVE_AFTER_7_DAYS_OR_50_JOBS,
-            removeOnFail: REMOVE_AFTER_30_DAYS_OR_150_JOBS,
-          }
+      if (trigger['type'] === 'webhook') {
+        logger.info(
+          `Skipping flow: Flow ID: ${flow.id}, Flow Name: ${flow.name}`
         );
-
-        await Flow.query().findById(flow.id).patch({ auto_scheduled: true });
+        continue;
       }
+
+      const jobName = `${JOB_NAME}-${flow['name']}-${flow.id}`;
+      logger.info(
+        `Adding flow to the queue: Flow ID: ${flow.id}, Flow Name: ${flow.name}`
+      );
+
+      await flowQueue.add(
+        jobName,
+        { flowId: flow.id },
+        {
+          repeat: repeatOptions,
+          jobId: flow.id,
+          removeOnComplete: REMOVE_AFTER_7_DAYS_OR_50_JOBS,
+          removeOnFail: REMOVE_AFTER_30_DAYS_OR_150_JOBS,
+        }
+      );
+
+      await Flow.query().findById(flow.id).patch({ auto_scheduled: true });
     }
   },
   { connection: redisConfig }
 );
 
 worker.on('completed', (job) => {
-  logger.info(`JOB ID: ${job.id} - LLM Scheduler has started!`);
+  logger.info(`JOB ID: ${job.id} - LLM Scheduler has completed!`);
 });
 
 worker.on('failed', async (job, err) => {
