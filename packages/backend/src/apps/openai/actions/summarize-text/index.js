@@ -5,9 +5,9 @@ const castFloatOrUndefined = (value) => {
 };
 
 export default defineAction({
-  name: 'Send prompt',
-  key: 'sendPrompt',
-  description: 'Creates a completion for the provided prompt and parameters.',
+  name: 'Summarize text',
+  key: 'summarizeText',
+  description: 'Summarizes the provided text.',
   arguments: [
     {
       label: 'Model',
@@ -27,21 +27,12 @@ export default defineAction({
       },
     },
     {
-      label: 'Prompt',
-      key: 'prompt',
+      label: 'Text',
+      key: 'text',
       type: 'string',
       required: true,
       variables: true,
-      description: 'The text to analyze.',
-    },
-    {
-      label: 'Temperature',
-      key: 'temperature',
-      type: 'string',
-      required: false,
-      variables: true,
-      description:
-        'What sampling temperature to use. Higher values mean the model will take more risk. Try 0.9 for more creative applications, and 0 for ones with a well-defined answer. We generally recommend altering this or Top P but not both.',
+      description: 'The text to summarize.',
     },
     {
       label: 'Maximum tokens',
@@ -93,8 +84,12 @@ export default defineAction({
       model: $.step.parameters.model,
       messages: [
         {
+          role: 'system',
+          content: 'Summarize text in a concise and informative style',
+        },
+        {
           role: 'user',
-          content: $.step.parameters.prompt,
+          content: $.step.parameters.text,
         },
       ],
       temperature: castFloatOrUndefined($.step.parameters.temperature),
