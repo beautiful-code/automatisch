@@ -23,14 +23,33 @@ export default defineAction({
         ],
       },
     },
+    {
+      label: 'Show completed tasks',
+      key: 'showCompleted',
+      type: 'dropdown',
+      required: false,
+      value: false,
+      description: 'Whether to show completed tasks.',
+      options: [
+        {
+          label: 'Yes',
+          value: true,
+        },
+        {
+          label: 'No',
+          value: false,
+        },
+      ],
+    },
   ],
 
   async run($) {
     const taskListId = $.step.parameters.taskListId;
 
     const params = {
-      showCompleted: true,
+      showCompleted: $.step.parameters.showCompleted,
       showHidden: true,
+      showDeleted: false,
     };
 
     const { data } = await $.http.get(`/tasks/v1/lists/${taskListId}/tasks`, {
@@ -38,7 +57,9 @@ export default defineAction({
     });
 
     $.setActionItem({
-      raw: data,
+      raw: {
+        tasks: data.items,
+      },
       dataOutput: {
         tasks: data.items,
       },
