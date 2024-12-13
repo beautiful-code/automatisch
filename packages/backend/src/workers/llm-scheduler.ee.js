@@ -1,10 +1,8 @@
 import { Worker } from 'bullmq';
 import process from 'node:process';
 
-import * as Sentry from '../helpers/sentry.ee.js';
 import redisConfig from '../config/redis.js';
 import logger from '../helpers/logger.js';
-import llmSchedulerQueue from '../queues/llm-scheduler.ee.js';
 import Flow from '../models/flow.js';
 import flowQueue from '../queues/flow.js';
 import {
@@ -14,7 +12,7 @@ import {
 
 const EVERY_1_MINUTE_CRON = '*/2 * * * *';
 const JOB_NAME = 'flow';
-export const worker = new Worker(
+const llmSchedulerWorker = new Worker(
   'llm-scheduler',
   async (job) => {
     const flows = await Flow.query()
@@ -60,11 +58,11 @@ export const worker = new Worker(
   { connection: redisConfig }
 );
 
-worker.on('completed', (job) => {
+llmSchedulerWorker.on('completed', (job) => {
   logger.info(`JOB ID: ${job.id} - LLM Scheduler has completed!`);
 });
 
-worker.on('failed', async (job, err) => {
+llmSchedulerWorker.on('failed', async (job, err) => {
   const errorMessage = `
     JOB ID: ${job.id} - LLM Scheduler has failed to start with ${err.message}
     \n ${err.stack}
@@ -73,5 +71,7 @@ worker.on('failed', async (job, err) => {
 });
 
 process.on('SIGTERM', async () => {
-  await worker.close();
+  await llmSchedulerWorker.close();
 });
+
+export default llmSchedulerWorker;
